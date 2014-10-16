@@ -3,13 +3,18 @@ class Install {
 
     protected $module;
     protected $version;
+    protected $description;
+    
+    
     protected $module_file;
     protected $update = array();
     protected $updates_available = false;
     protected $messages = array(true => array(), false => array() );
+    
+    protected $folders = array();
 
-    public function setName($name){
-        $this->module = (string) $name;
+    public function set_name($name){
+        $this->module = (string) ucfirst($name);
         (@include('include/includes/module/'.$this->module.'.php')) 
             OR die('
                 <h1>Fehler: Medium nicht vorhanden!</h1>
@@ -20,8 +25,8 @@ class Install {
                 </p>
 
                 <p>
-                    Das Medium brauch den gleichen Name wie das Module, in klein Buchstaben geschrieben und als PHP Datei.
-                    Im Medium wird ein Object ben&ouml;tigt mit dem Modulename, der ebenfalls mit kleinbuchstaben geschrieben sein muss.
+                    Das Medium brauch den gleichen Name wie das Module.
+                    Im Medium wird ein Object ben&ouml;tigt mit dem Modulename, der den ersten buchtsaben in groß geschrieben sein muss, der rest klein.
                 </p>
 
                 <p>
@@ -32,11 +37,60 @@ class Install {
             ');
 
         return $this;
+    }  
+    public function get_name(){
+        return $this->module;
     }
 
-    public function setVersion($version){
+    public function set_version($version){
         $this->version = (integer) $version;
         return $this;
+    }   
+    public function get_version(){
+        $this->updates_available();
+        return max($this->update['version']);
+    }
+
+    public function set_description($description) {
+        $this->description = (string) $description;
+        return $this;
+    }    
+    public function get_description($description) {
+        return $this->description;
+    }
+    
+    public function set_folders(array $chmod) {
+
+        foreach( $chmod as $key => $path ){
+            if( !is_dir( $path ) ){
+                @mkdir( $path );
+            }
+            
+            $this->folders['path'][] = $path;
+
+            if( is_writeable( $path ) ){
+               $this->folders['status'][] = true;
+            } else {
+                $this->folders['status'][] = false;
+            }
+        }
+        
+        return $this;
+    }    
+    public function get_folders() {
+        return $this->folders;
+    }
+    public function get_folder_status() {
+        return !in_array( false, $this->folder['status'] );
+    }
+    
+    public function version($version = false){
+        // Diese Function ist bisher ein Test, wird später mit einer Datenbank verbunden!
+        if( $version ) {
+            echo "Update to Version " . $version ."<br />";
+        } else {
+            return 10;
+        }
     }
 
     public function module(){
@@ -91,15 +145,6 @@ class Install {
         return $this->updates_available;
     }
 
-    public function version($version = false){
-        // Diese Function ist bisher ein Test, wird später mit einer Datenbank verbunden!
-        if( $version ) {
-            echo "Update to Version " . $version ."<br />";
-        } else {
-            return 10;
-        }
-    }
-
     public function message($status, $message){
         $this->messages[$status][] = $message;
     }
@@ -118,7 +163,7 @@ class Install {
 
     }
 
-    public function list_updates(){
+    public function list_updates() {
         
         if (count($this->update['message']) != 0) {
             $msg = implode("</li>\n<li>", $this->update['message']);
@@ -126,7 +171,7 @@ class Install {
         }
     }
 
-    public static function parse_version($version){
+    public static function parse_version($version) {
         return implode('.', str_split($version));
     }
 }

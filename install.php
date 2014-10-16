@@ -17,12 +17,20 @@
 	require('include/includes/class/install.php');
 
 	$install = new Install();
-	$install->setName('download')
-	        ->setVersion(100);
+	$install->set_name('Download')
+	        ->set_version(100)
+                 ->set_description('Das Download Script erweitert das Standart Download Script von ilch!')
+                 ->set_folders( array(
+                    'include/images/download/',
+                    'include/images/downcats/'
+                 ) );
 
 	$install->module();
 	$install->update();
 	$install->list_updates();
 	$install->log();
+        
 
-?>
+        ?><pre><?php
+        print_r($install->get_version());
+        ?></pre><?php
