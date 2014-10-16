@@ -7,11 +7,11 @@ class Install {
     
     
     protected $module_file;
-    protected $update = array();
+    protected $update = array('num' => 0);
     protected $updates_available = false;
     protected $messages = array(true => array(), false => array() );
     
-    protected $folders = array();
+    protected $folders = array('path' => array(), 'status' => array() );
 
     public function set_name($name){
         $this->module = (string) ucfirst($name);
@@ -41,6 +41,9 @@ class Install {
     public function get_name(){
         return $this->module;
     }
+    public function get_update_num(){
+        return $this->update['num'];
+    }
 
     public function set_version($version){
         $this->version = (integer) $version;
@@ -48,28 +51,25 @@ class Install {
     }   
     public function get_version(){
         $this->updates_available();
-        return max($this->update['version']);
+        return @max($this->update['version']);
     }
 
     public function set_description($description) {
         $this->description = (string) $description;
         return $this;
     }    
-    public function get_description($description) {
+    public function get_description() {
         return $this->description;
     }
     
     public function set_folders(array $chmod) {
 
         foreach( $chmod as $key => $path ){
-            if( !is_dir( $path ) ){
-                @mkdir( $path );
-            }
-            
+                      
             $this->folders['path'][] = $path;
 
             if( is_writeable( $path ) ){
-               $this->folders['status'][] = true;
+                $this->folders['status'][] = true;
             } else {
                 $this->folders['status'][] = false;
             }
@@ -81,7 +81,7 @@ class Install {
         return $this->folders;
     }
     public function get_folder_status() {
-        return !in_array( false, $this->folder['status'] );
+        return !in_array( false, $this->folders['status'] );
     }
     
     public function version($version = false){
@@ -89,7 +89,7 @@ class Install {
         if( $version ) {
             echo "Update to Version " . $version ."<br />";
         } else {
-            return 10;
+            return 12;
         }
     }
 
@@ -135,6 +135,7 @@ class Install {
             if(preg_match('/update_([0-9]{1,3})/', $update, $res ) ) {
                 if( $this->version() < $res[1] ) {
                     $this->updates_available = (bool) true;
+                    $this->update['num'] ++;
                     $this->update['version'][] = self::parse_version($res[1]);
                     $this->update['message'][] = 'Update '. self::parse_version($res[1]) .' ist f&uuml;r Modul: <b>'. ucfirst($this->module) .'</b> vorhanden!';
                     $this->update['methode_name'][] = $update;
