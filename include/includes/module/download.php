@@ -24,5 +24,9 @@ class Download {
     public function update_211(Install $install){
 
     }
+    
+    public function deinstall(){
+        
+    }
 }
 ?>

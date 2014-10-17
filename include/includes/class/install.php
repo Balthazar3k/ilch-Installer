@@ -10,6 +10,7 @@ class Install {
     protected $update = array('num' => 0);
     protected $updates_available = false;
     protected $messages = array(true => array(), false => array() );
+    protected $methodes = array();
     
     protected $folders = array('path' => array(), 'status' => array() );
 
@@ -84,6 +85,26 @@ class Install {
         return !in_array( false, $this->folders['status'] );
     }
     
+    public function is_methode($is) {
+        return in_array($is, $this->methodes);
+    }
+    
+    public function is_installed() {
+        return true;
+    }
+
+    public function can_install() {
+        return ($this->is_methode('install') && !$this->is_installed() );
+    }
+    
+    public function can_update() {
+        return ( $this->updates_available && $this->is_installed() );
+    }
+    
+    public function can_deinstall() {
+        return ($this->is_methode('deinstall') && $this->is_installed());
+    }
+    
     public function version($version = false){
         // Diese Function ist bisher ein Test, wird später mit einer Datenbank verbunden!
         if( $version ) {
@@ -131,8 +152,12 @@ class Install {
 
         $class_methods = get_class_methods($module);
         foreach( $class_methods as $key => $update) {
+            /* Filtert andere methoden aus */
+            if( preg_match('/(install|deinstall|update_[0-9]*)/', $update, $res ) ) {
+                $this->methodes[] = $res[1];
+            }
 
-            if(preg_match('/update_([0-9]{1,3})/', $update, $res ) ) {
+            if( preg_match('/update_([0-9]*)/', $update, $res ) ) {
                 if( $this->version() < $res[1] ) {
                     $this->updates_available = (bool) true;
                     $this->update['num'] ++;

@@ -92,7 +92,7 @@ $install->set_name('Download')
                 <br />
                 
                 <div class="col-lg-12 col-md-12 col-xs-12">
-                    <?php if( $install->updates_available() ) : ?>
+                    <?php if( $install->can_update() ) : ?>
                     <div class="col-lg-12 col-md-12 col-xs-12">
                         <div class="panel panel-success">
                             <div class="panel-heading"><b>Es sind <?=$install->get_update_num()?>x Update's vorhanden!</b></div>
@@ -109,6 +109,7 @@ $install->set_name('Download')
                     </div>
                     <?php endif; ?>
                     
+                    <?php if( $install->updates_available() && $install->can_install() ) : ?>
                     <div class="col-lg-6 col-md-6 col-xs-12">
                         <div class="panel panel-info">
                             <div class="panel-heading"><b>Volle Installation</b></div>
@@ -120,18 +121,35 @@ $install->set_name('Download')
                             </div>
                         </div>
                     </div>
+                    <?php endif; ?>
                     
+                    <?php if( $install->can_install() ) : ?>
                     <div class="col-lg-6 col-md-6 col-xs-12">
                         <div class="panel panel-info">
-                            <div class="panel-heading"><b>nur das Modul installieren</b></div>
+                            <div class="panel-heading"><b>nur die erste Version installieren</b></div>
                             <div class="panel-body">
-                                Es wird nur das Modul installier, ohne irgendwelche Update's. Dadurch kann man Version 1.0 ausprobieren.
+                                Es wird nur das Modul installiert, ohne irgendwelche Update's. Dadurch kann man Version 1.0 ausprobieren.
                             </div>
                             <div class="panel-footer text-center">
                                 <a class="btn btn-success" href="">Installieren</a>
                             </div>
                         </div>
                     </div>
+                    <?php endif; ?>
+                    
+                    <?php if( $install->can_deinstall() ) : ?>
+                    <div class="col-lg-6 col-md-6 col-xs-12">
+                        <div class="panel panel-warning">
+                            <div class="panel-heading"><b>Deinstallieren</b></div>
+                            <div class="panel-body">
+                                Es wird das Modul deinstalliert & versucht alle Datein zu entfernen.
+                            </div>
+                            <div class="panel-footer text-center">
+                                <a class="btn btn-success" href="">DeInstallieren</a>
+                            </div>
+                        </div>
+                    </div>
+                    <?php endif; ?>
                 </div>
             </section>
             <?php break; }?>
@@ -153,6 +171,9 @@ $install->set_name('Download')
         </div>
     </body>
 </html>
+<pre>
 <?php
 //db_colse();
+print_r($install);
 ?>
+</pre>
