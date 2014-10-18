@@ -125,6 +125,10 @@ class Install {
         $init = new $module();
         $status = $init->install($this);
         $this->installed($status);
+        $this->messages($status, array(
+            'Installation war <b class="color: red;">nicht</b> erfolgreich!',
+            'Installation war erfolgreich!'
+        ));
     }
 
     public function update(){
@@ -184,6 +188,10 @@ class Install {
     }
 
     public function message($status, $message){
+        if( is_array($message) ){
+            $message = $message[$status];
+        }
+        
         $this->messages[$status][] = $message;
     }
 
