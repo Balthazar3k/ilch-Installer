@@ -6,7 +6,7 @@ class Install {
     protected $description;
     
     
-    protected $module_file;
+    protected $module_class;
     protected $update = array('num' => 0);
     protected $updates_available = false;
     protected $messages = array(true => array(), false => array() );
@@ -26,7 +26,7 @@ class Install {
                 </p>
 
                 <p>
-                    Das Medium brauch den gleichen Name wie das Module.
+                    Das installations Medium brauch den gleichen Name wie das Module, der erste Buchstabe muss dementspr&auml;chent gross geschrieben werden.
                     Im Medium wird ein Object ben&ouml;tigt mit dem Modulename, der den ersten buchtsaben in groß geschrieben sein muss, der rest klein.
                 </p>
 
@@ -37,13 +37,24 @@ class Install {
                 </p>
             ');
 
+        
+
+        /* Init Module Class */
+        $class_name = $this->module;
+        $this->module_class = new $class_name();
+
         return $this;
     }  
     public function get_name(){
         return $this->module;
     }
+
     public function get_update_num(){
         return $this->update['num'];
+    }
+
+    public function get_author(){
+        return $this->module_class->author;
     }
 
     public function set_version($version){
@@ -55,7 +66,11 @@ class Install {
         return @max($this->update['version']);
     }
 
-    public function set_description($description) {
+    public function set_description($description = false ) {
+
+        if( !$description )
+            $description = $this->module_class->description;
+
         $this->description = (string) $description;
         return $this;
     }    
@@ -63,7 +78,10 @@ class Install {
         return $this->description;
     }
     
-    public function set_folders(array $chmod) {
+    public function set_folders($chmod = false) {
+
+        if( !$chmod || !is_array($chmod) )
+            $chmod = $this->module_class->folders();
 
         foreach( $chmod as $key => $path ){
                       
@@ -121,9 +139,7 @@ class Install {
     public function module(){
         $this->version($this->version);
 
-        $module = $this->module;
-        $init = new $module();
-        $status = $init->install($this);
+        $status = $this->module_class->install($this);
         $this->installed($status);
         $this->message($status, array(
             'Installation war <b class="color: red;">nicht</b> erfolgreich!',
@@ -136,7 +152,7 @@ class Install {
         $this->updates_available();
 
         foreach( $this->update['methode_name'] as $key => $update) {
-            $status = $this->module_file->$update($this);
+            $status = $this->module_class->$update($this);
 
             if( is_bool($status) && !$status ){
                 $this->message(false, 'Fehler bei Update <b>'.$this->update['version'][$key].'</b>, Installation wurde unterbrochen!');
@@ -151,9 +167,14 @@ class Install {
     }
     
     public function deinstall(){
-        $module = $this->module;
-        $init = new $module();
-        $init->deinstall($this);
+        $status = $this->module_class->deinstall($this);
+        $status = ( is_bool($status) ? $status : true );
+
+        $this->message($status, array(
+            'Deinstallation war nicht erfolgreich',
+            'Deinstallation war erfolgreich!'
+        ));
+
         db_query("DELETE FROM prefix_allg WHERE `k`='".$this->module."-module';");
     }
 
@@ -163,11 +184,7 @@ class Install {
         if( $this->updates_available )
             return $this->updates_available;
 
-        /* Starte Module Klasse */
-        $module = $this->module;
-        $this->module_file = new $module();
-
-        $class_methods = get_class_methods($module);
+        $class_methods = get_class_methods($this->module);
         foreach( $class_methods as $key => $update) {
             /* Filtert andere methoden aus */
             if( preg_match('/(install|deinstall|update_[0-9]*)/', $update, $res ) ) {
