@@ -89,7 +89,7 @@ class Install {
         return in_array($is, $this->methodes);
     }   
     public function is_installed() {
-        return (integer) db_result(db_query("SELECT v6 FROM prefix_allg WHERE k='".$this->module."-module' LIMIT 1;"),0);
+        return (integer) @db_result(db_query("SELECT v6 FROM prefix_allg WHERE `k`='".$this->module."-module' LIMIT 1;"),0);
     }
 
     public function can_install() {
@@ -105,27 +105,27 @@ class Install {
     public function version($version = false){
         if( $version ) {
             $current_version = $this->version();
-            if( in_null($current_version) ){
-                db_query("INSERT INTO prefix_allg (k,v1) VALUES('".$this->module."-module','".$version."');");
+            if( !$current_version ){
+                db_query("INSERT INTO prefix_allg (`k`,`v1`) VALUES('".$this->module."-module','".$this->version."');");
             } else {
                 db_query("UPDATE prefix_allg SET v1='".$version."' WHERE k='".$this->module."-module';");
             }
         } else {
-            return db_result(db_query("SELECT v1 FROM prefix_allg WHERE k='".$this->module."-module' LIMIT 1;"),0);
+            return @db_result(db_query("SELECT v1 FROM prefix_allg WHERE k='".$this->module."-module' LIMIT 1;"),0);
         }
     }   
-    public function installed($status = true){
-        db_query("UPDATE prefix_allg SET v6='".$status."' WHERE k='".$this->module."-module';");
+    public function installed($status = 1){
+        db_query("UPDATE prefix_allg SET `v6`='".((string) $status)."' WHERE `k`='".$this->module."-module';");
     }
 
     public function module(){
-        $this->version();
+        $this->version($this->version);
 
         $module = $this->module;
         $init = new $module();
         $status = $init->install($this);
         $this->installed($status);
-        $this->messages($status, array(
+        $this->message($status, array(
             'Installation war <b class="color: red;">nicht</b> erfolgreich!',
             'Installation war erfolgreich!'
         ));
@@ -142,7 +142,7 @@ class Install {
                 $this->message(false, 'Fehler bei Update <b>'.$this->update['version'][$key].'</b>, Installation wurde unterbrochen!');
                 break;
             } else {
-                $this->version($this->update['version'][$key]);
+                $this->version(str_replace('.', '', $this->update['version'][$key]));
                 $this->message(true, 'Installation von Update <b>'.$this->update['version'][$key].'</b> war erfolgreich!');
             }
 
@@ -154,6 +154,7 @@ class Install {
         $module = $this->module;
         $init = new $module();
         $init->deinstall($this);
+        db_query("DELETE FROM prefix_allg WHERE `k`='".$this->module."-module';");
     }
 
     public function updates_available(){
