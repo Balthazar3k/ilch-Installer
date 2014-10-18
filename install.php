@@ -71,27 +71,26 @@ $install->set_name('Download')
                         </tbody>
                     </table>
                     <div class="panel-footer text-right">
-                        <a href="?step=install" class="btn btn-<?= ($install->get_folder_status() ? 'success' : 'danger disabled'); ?>">Weiter zur Installation...</a>
+                        <a href="?step=install_methodes" class="btn btn-<?= ($install->get_folder_status() ? 'success' : 'danger disabled'); ?>">Weiter zur Installation...</a>
                     </div>
                 </div>
             </section>
-            <?php break; case 'install' : ?>
+            <?php break; case 'install_methodes' : ?>
             <section>
                 <p>
                     <h3>Welche Art der Installation m&ouml;chten Sie vornehmen?</h3>
                     Ihnen stehen folgende m&ouml;glichkeiten zur verf&uuml;gung!
                 </p>
 
-
                 <div class="alert alert-info" role="alert">
                     Mit dem Klicken der Buttons "Installieren" erkl&auml;ren Sie sich damit einverstanden, dass der Module entwickler & der entwickler des Installations Script auf Ihren eigenen wunsch das Module installiert.
                     Wir &uuml;bernnehmen keine Haftung an Sch&auml;den, die durch diese Script enstehen k&ouml;nnten. Wir empfehlen zu Ihrer eigen Sicherheit ein Backup zu erstellen, sowohl die Datein als auch die Datenbank.
                 </div>
 
-                
                 <br />
                 
                 <div class="col-lg-12 col-md-12 col-xs-12">
+                    
                     <?php if( $install->can_update() ) : ?>
                     <div class="col-lg-12 col-md-12 col-xs-12">
                         <div class="panel panel-success">
@@ -103,7 +102,7 @@ $install->set_name('Download')
                                 </p>
                             </div>
                             <div class="panel-footer text-center">
-                                <a class="btn btn-success" href="">Installiere alle <b><?=$install->get_update_num()?></b> Update's</a>
+                                <a class="btn btn-success" href="?step=update">Installiere alle <b><?=$install->get_update_num()?></b> Update's</a>
                             </div>
                         </div>
                     </div>
@@ -117,7 +116,7 @@ $install->set_name('Download')
                                 Bei der Vollen installation handelt es sich um, der Hauptinstallation des $module und seiner gesamten Updates!
                             </div>
                             <div class="panel-footer text-center">
-                                <a class="btn btn-success" href="">Installieren</a>
+                                <a class="btn btn-success" href="?step=install">Installieren</a>
                             </div>
                         </div>
                     </div>
@@ -131,7 +130,7 @@ $install->set_name('Download')
                                 Es wird nur das Modul installiert, ohne irgendwelche Update's. Dadurch kann man Version 1.0 ausprobieren.
                             </div>
                             <div class="panel-footer text-center">
-                                <a class="btn btn-success" href="">Installieren</a>
+                                <a class="btn btn-success" href="?step=mininstall">Installieren</a>
                             </div>
                         </div>
                     </div>
@@ -145,13 +144,50 @@ $install->set_name('Download')
                                 Es wird das Modul deinstalliert & versucht alle Datein zu entfernen.
                             </div>
                             <div class="panel-footer text-center">
-                                <a class="btn btn-success" href="">DeInstallieren</a>
+                                <a class="btn btn-success" href="?step=deinstall">DeInstallieren</a>
                             </div>
                         </div>
                     </div>
                     <?php endif; ?>
                 </div>
             </section>
+            <?php 
+                break; 
+                case 'install' : 
+                    if( $install->is_installed() )
+                        break;
+                
+                    $install->module();
+                    $install->update();
+                    $install->log();
+            ?>
+            <?php 
+                break; 
+                case 'mininstall' : 
+                    if( $install->is_installed() )
+                        break;
+                
+                    $install->module();
+                    $install->log();
+            ?>
+            <?php 
+                break; 
+                case 'update' : 
+                    if( !$install->is_installed() )
+                        break;
+                
+                    $install->update();
+                    $install->log();
+            ?>
+            <?php 
+                break; 
+                case 'deinstall' : 
+                    if( !$install->is_installed() )
+                        break;
+                
+                    $install->deinstall();
+                    $install->log();
+            ?>
             <?php break; }?>
             <section id="step-2">
             </section>

@@ -1,7 +1,7 @@
 <?php
 class Download {
     public function install(Install $install){
-    	echo "erst Installation wurde ausgef&uuml;hrt!";
+    	echo "Die erste Installation wurde ausgef&uuml;hrt!";
     	$install->message(false, 'Hallo Welt!');
     }
 

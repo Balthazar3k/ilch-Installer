@@ -139,6 +139,12 @@ class Install {
             $status = NULL;
         }
     }
+    
+    public function deinstall(){
+        $module = $this->module;
+        $init = new $module();
+        $init->deinstall($this);
+    }
 
     public function updates_available(){
 
@@ -179,12 +185,12 @@ class Install {
 
         if (count($this->messages[false]) != 0) {
             $msg = implode("</li>\n<li>", $this->messages[false]);
-            echo "<ul id=\"install false\"><li>" . $msg . "</li></ul>";
+            echo "<div class=\"alert alert-danger\"><ul><li>" . $msg . "</li></ul></div>";
         }
         
         if (count($this->messages[true]) != 0) {
             $msg = implode("</li>\n<li>", $this->messages[true]);
-            echo "<ul id=\"install true\"><li>" . $msg . "</li></ul>";
+            echo "<div class=\"alert alert-success\"><ul><li>" . $msg . "</li></ul></div>";
         }
 
     }
@@ -193,7 +199,7 @@ class Install {
         
         if (count($this->update['message']) != 0) {
             $msg = implode("</li>\n<li>", $this->update['message']);
-            echo "<ul id=\"install true\"><li>" . $msg . "</li></ul>";
+            echo "<div class=\"alert alert-info\"><b>Update's Information</b><br /><ol><li>" . $msg . "</li></ol></div>";
         }
     }
 
